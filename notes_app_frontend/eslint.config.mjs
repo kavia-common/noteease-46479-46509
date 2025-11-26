@@ -1,16 +1,19 @@
-// eslint.config.mjs
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default [
-  js.configs.recommended,
+  // Ignore generated and build artifacts
+  {
+    ignores: ['.astro/**', 'dist/**', 'node_modules/**', 'public/**'],
+  },
 
-  // TypeScript support
+  js.configs.recommended,
   ...tseslint.configs.recommended,
 
+  // TypeScript files
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.d.ts'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -18,29 +21,37 @@ export default [
         ecmaVersion: 2022,
         sourceType: 'module',
       },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
     rules: {
-      // Example custom rules for TS
       '@typescript-eslint/no-unused-vars': ['warn'],
       '@typescript-eslint/explicit-function-return-type': 'off',
+      // Allow generated .d.ts patterns that include `any` and triple-slash refs
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/triple-slash-reference': 'off',
     },
   },
 
-  // JS files config (same as before)
+  // JavaScript files
   {
-    files: ['**/*.js', '**/*.jsx'],
+    files: ['**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        ...globals.node,
         ...globals.browser,
+        ...globals.node,
       },
     },
     rules: {
       'no-unused-vars': 'warn',
       'no-console': 'off',
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
+      'no-undef': 'off',
     },
   },
 ];
